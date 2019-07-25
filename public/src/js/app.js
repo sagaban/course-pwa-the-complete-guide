@@ -1,4 +1,9 @@
 let deferredPrompt;
+
+if (!window.Promise) {
+  window.Promise = Promise;
+}
+
 /**
  * The Navigator interface represents the state and the identity of the user
  * agent. It allows scripts to query it and to register themselves to carry on
@@ -7,11 +12,15 @@ let deferredPrompt;
 if ("serviceWorker" in navigator) {
   // `{ scope: "/help/" }` could be passed as second argument to define the SW scope
   // It only works with restrictive (more specific) scopes
-  navigator.serviceWorker.register("/sw.js").then(() => {
-    console.log("Service worker registered!");
-  });
+  navigator.serviceWorker
+    .register("/sw.js")
+    .then(() => {
+      console.log("Service worker registered!");
+    })
+    .catch(error => {
+      console.error("Error registering Service Worker: ", error);
+    });
 }
-
 window.addEventListener("beforeinstallprompt", event => {
   console.log("beforeinstallprompt triggered...");
   // Prevent Chrome <= 67 from automatically showing the prompt
@@ -29,4 +38,25 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     registration.unregister();
   }
 });
+*/
+
+/*
+Examples of how fetch works
+
+fetch("https://httpbin.org/ip")
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error(error));
+
+fetch("https://httpbin.org/post", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json"
+  },
+  body: JSON.stringify({ message: "Testing if POST works" })
+})
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error(error));
 */
