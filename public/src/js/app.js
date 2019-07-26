@@ -39,24 +39,3 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
   }
 });
 */
-
-/*
-Examples of how fetch works
-
-fetch("https://httpbin.org/ip")
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error(error));
-
-fetch("https://httpbin.org/post", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json"
-  },
-  body: JSON.stringify({ message: "Testing if POST works" })
-})
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error(error));
-*/

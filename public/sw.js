@@ -17,7 +17,7 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  console.log("[Service Worker] Fetching something...", event.request.url);
+  // console.log("[Service Worker] Fetching something...", event.request.url);
   // Override what's is being respond. Null will make site unavailable
   // event.respondWith(null);
   event.respondWith(fetch(event.request));

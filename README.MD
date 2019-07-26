@@ -1,5 +1,5 @@
 # Progressive Web Apps - Complete Guide
-This source code is part of Maximilian Schwarzmüller's "Progressive Web Apps - Complete Guide" course on udemy.com.
+This source code is part of Maximilian Schwarzmüller's [Progressive Web Apps](https://www.udemy.com/course/progressive-web-app-pwa-the-complete-guide/) - Complete Guide" course on udemy.com.
 
 # How to Use
 You need [Node.js](https://nodejs.org) installed on your machine. Simply download the installer from [nodejs.org](https://nodejs.org) and go through the installation steps.
