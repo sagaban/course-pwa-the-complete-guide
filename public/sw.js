@@ -1,5 +1,5 @@
-const CACHE_STATIC_NAME = "static-v3";
-const CACHE_DYNAMIC_NAME = "dynamic-v2";
+const CACHE_STATIC_NAME = "static-v5";
+const CACHE_DYNAMIC_NAME = "dynamic-v3";
 
 self.addEventListener("install", event => {
   console.log("[Service Worker] Installing Service Worker...", event);
@@ -76,11 +76,11 @@ self.addEventListener("fetch", event => {
       } else {
         return fetch(event.request)
           .then(res => {
-            caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+            return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
               // If the response was good, clone it and store it in the cache.
               if (res.status === 200) {
                 // We have to clone so we don't consume the response
-                cache.put(event.request.url, res.clone());
+                // cache.put(event.request.url, res.clone());
               }
               return res;
             });
