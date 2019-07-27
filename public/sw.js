@@ -1,5 +1,5 @@
-const CACHE_STATIC_NAME = "static-v5";
-const CACHE_DYNAMIC_NAME = "dynamic-v3";
+const CACHE_STATIC_NAME = "static-v6";
+const CACHE_DYNAMIC_NAME = "dynamic-v4";
 
 self.addEventListener("install", event => {
   console.log("[Service Worker] Installing Service Worker...", event);
@@ -21,6 +21,7 @@ self.addEventListener("install", event => {
       cache.addAll([
         "/",
         "/index.html",
+        "/offline.html",
         "/src/js/app.js",
         "/src/js/feed.js",
         // If polyfills are needed, SW is not supported. No need to cache.
@@ -80,12 +81,20 @@ self.addEventListener("fetch", event => {
               // If the response was good, clone it and store it in the cache.
               if (res.status === 200) {
                 // We have to clone so we don't consume the response
-                // cache.put(event.request.url, res.clone());
+                cache.put(event.request.url, res.clone());
               }
               return res;
             });
           })
-          .catch(() => {});
+          .catch(err => {
+            // We couldn't fetch the page from tne network
+            // We will show the offline page
+            return caches.open(CACHE_STATIC_NAME).then(cache => {
+              // If we try to make an API call to get a JSON, we are also
+              // returning this file
+              return cache.match("/offline.html");
+            });
+          });
       }
     })
   );
