@@ -22,7 +22,7 @@ if ("serviceWorker" in navigator) {
     });
 }
 window.addEventListener("beforeinstallprompt", event => {
-  console.log("beforeinstallprompt triggered...");
+  // console.log("beforeinstallprompt triggered...");
   // Prevent Chrome <= 67 from automatically showing the prompt
   event.preventDefault();
   // Stash the event so it can be triggered later.
