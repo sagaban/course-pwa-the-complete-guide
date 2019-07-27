@@ -55,7 +55,16 @@ self.addEventListener("fetch", event => {
       if (response) {
         return response;
       } else {
-        return fetch(event.request);
+        return fetch(event.request).then(res => {
+          caches.open("dynamic").then(cache => {
+            // If the response was good, clone it and store it in the cache.
+            if (res.status === 200) {
+              // We have to clone so we don't consume the response
+              cache.put(event.request.url, res.clone());
+            }
+            return res;
+          });
+        });
       }
     })
   );
