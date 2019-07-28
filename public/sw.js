@@ -1,5 +1,7 @@
 const CACHE_STATIC_NAME = "static-v5";
 const CACHE_DYNAMIC_NAME = "dynamic-v4";
+const POSTS_URL =
+  "https://course-pwa-the-complete-guide.firebaseio.com/posts.json";
 
 self.addEventListener("install", event => {
   console.log("[Service Worker] Installing Service Worker...");
@@ -42,17 +44,17 @@ self.addEventListener("install", event => {
   );
 });
 
-function trimCache(cacheName, maxItems) {
-  caches.open(cacheName).then(cache =>
-    cache.keys().then(keys => {
-      if (keys.length > maxItems) {
-        for (let i = 0; i < keys.length - maxItems; i++) {
-          cache.delete(keys[i]);
-        }
-      }
-    })
-  );
-}
+// function trimCache(cacheName, maxItems) {
+//   caches.open(cacheName).then(cache =>
+//     cache.keys().then(keys => {
+//       if (keys.length > maxItems) {
+//         for (let i = 0; i < keys.length - maxItems; i++) {
+//           cache.delete(keys[i]);
+//         }
+//       }
+//     })
+//   );
+// }
 
 self.addEventListener("activate", event => {
   console.log("[Service Worker] Activating Service Worker...");
@@ -146,16 +148,13 @@ self.addEventListener("activate", event => {
 
 // Cache, then network (see feed.js part) + cache fallback network + Generic fallback
 self.addEventListener("fetch", event => {
-  const url = "https://httpbin.org/get";
-  if (event.request.url.includes(url)) {
+  if (event.request.url.includes(POSTS_URL)) {
     event.respondWith(
       caches.open(CACHE_DYNAMIC_NAME).then(cache => {
         return fetch(event.request)
           .then(res => {
-            trimCache(CACHE_DYNAMIC_NAME, 20);
-            if (res.status === 200) {
-              cache.put(event.request, res.clone());
-            }
+            // trimCache(CACHE_DYNAMIC_NAME, 20);
+            cache.put(event.request, res.clone());
             return res;
           })
           .catch(err => {
@@ -174,10 +173,8 @@ self.addEventListener("fetch", event => {
           return fetch(event.request)
             .then(res => {
               return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
-                trimCache(CACHE_DYNAMIC_NAME, 20);
-                if (res.status === 200) {
-                  cache.put(event.request.url, res.clone());
-                }
+                // trimCache(CACHE_DYNAMIC_NAME, 20);
+                cache.put(event.request.url, res.clone());
                 return res;
               });
             })

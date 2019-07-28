@@ -4,6 +4,8 @@ var closeCreatePostModalButton = document.querySelector(
   "#close-create-post-modal-btn"
 );
 var sharedMomentsArea = document.querySelector("#shared-moments");
+const POSTS_URL =
+  "https://course-pwa-the-complete-guide.firebaseio.com/posts.json";
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
@@ -54,23 +56,23 @@ function clearCards() {
   }
 }
 
-function createCard(from) {
+function createCard(data) {
   var cardWrapper = document.createElement("div");
   cardWrapper.className = "shared-moment-card mdl-card mdl-shadow--2dp";
   var cardTitle = document.createElement("div");
   cardTitle.className = "mdl-card__title";
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = `url("${data.image}")`;
   cardTitle.style.backgroundSize = "cover";
   cardTitle.style.height = "180px";
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement("h2");
   cardTitleTextElement.style.color = "white";
   cardTitleTextElement.className = "mdl-card__title-text";
-  cardTitleTextElement.textContent = "San Francisco Trip " + from;
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement("div");
   cardSupportingText.className = "mdl-card__supporting-text";
-  cardSupportingText.textContent = "In San Francisco";
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = "center";
   // var cardSaveButton = document.createElement("button");
   // cardSaveButton.textContent = "Save";
@@ -81,22 +83,17 @@ function createCard(from) {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-// fetch("https://httpbin.org/get")
-//   .then(function(res) {
-//     return res.json();
-//   })
-//   .then(function(data) {
-//     createCard();
-//   });
+function updateUI(data) {
+  data.forEach(datum => createCard(datum));
+}
 
 // CACHE STRATEGIES
 // Cache, then network (see SW part)
-const url = "https://httpbin.org/get";
 let networkDataReceived = false;
 
 if ("caches" in window) {
   caches
-    .match(url)
+    .match(POSTS_URL)
     .then(cache => {
       if (cache) {
         return cache.json();
@@ -106,12 +103,12 @@ if ("caches" in window) {
       console.log("Creating card from cache");
       if (data && !networkDataReceived) {
         clearCards();
-        createCard("Cache");
+        updateUI(Object.values(data));
         networkDataReceived = false;
       }
     });
 }
-fetch(url)
+fetch(POSTS_URL)
   .then(res => res.json())
   .then(data => {
     if (data) {
@@ -119,10 +116,10 @@ fetch(url)
       setTimeout(() => {
         console.log("Creating card from network");
         clearCards();
-        createCard("Network");
+        updateUI(Object.values(data));
       }, 1500);
     }
   })
   .catch(err => {
-    console.warn(`Error fetching ${url}: ${err}`);
+    console.warn(`Error fetching ${POSTS_URL}: ${err}`);
   });
