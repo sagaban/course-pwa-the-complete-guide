@@ -1,3 +1,5 @@
+importScripts("/src/js/idb.js");
+
 const CACHE_STATIC_NAME = "static-v5";
 const CACHE_DYNAMIC_NAME = "dynamic-v4";
 const POSTS_URL =
@@ -26,6 +28,7 @@ self.addEventListener("install", event => {
         "/offline.html",
         "/src/js/app.js",
         "/src/js/feed.js",
+        "/src/js/idb.js",
         // If polyfills are needed, SW is not supported. No need to cache.
         // Should conditionally loaded in our work flow
         // Added for performance issues
@@ -42,6 +45,20 @@ self.addEventListener("install", event => {
       ]);
     })
   );
+});
+
+const dbPromise = idb.openDB("post-store", 1, {
+  upgrade(db) {
+    // Create a store of objects
+    const store = db.createObjectStore("posts", {
+      // The 'id' property of the object will be the key.
+      keyPath: "id",
+      // If it isn't explicitly set, create a value by auto incrementing.
+      autoIncrement: true
+    });
+    // Create an index on the 'date' property of the objects.
+    // store.createIndex('date', 'date');
+  }
 });
 
 // function trimCache(cacheName, maxItems) {
@@ -150,18 +167,22 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.url.includes(POSTS_URL)) {
     event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME).then(cache => {
-        return fetch(event.request)
-          .then(res => {
-            // trimCache(CACHE_DYNAMIC_NAME, 20);
-            cache.put(event.request, res.clone());
-            return res;
-          })
-          .catch(err => {
-            console.warn(
-              `There was an errot fetching ${event.request.url}: ${err}`
-            );
-          });
+      fetch(event.request).then(res => {
+        const clonedRed = res.clone();
+        clonedRed.json().then(data => {
+          dbPromise
+            .then(db => {
+              console.log("Getting DB");
+              const tx = db.transaction("posts", "readwrite");
+              Object.values(data).forEach(d => {
+                console.log("Adding data to DB");
+                tx.store.add(d);
+              });
+              return tx.done;
+            })
+            .catch(e => console.log("Error getting db: " + e));
+        });
+        return res;
       })
     );
   } else {
