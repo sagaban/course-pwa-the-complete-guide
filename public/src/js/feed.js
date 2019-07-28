@@ -102,9 +102,9 @@ if ("caches" in window) {
         return cache.json();
       }
     })
-    .then(() => {
+    .then(data => {
       console.log("Creating card from cache");
-      if (!networkDataReceived) {
+      if (data && !networkDataReceived) {
         clearCards();
         createCard("Cache");
         networkDataReceived = false;
@@ -113,11 +113,16 @@ if ("caches" in window) {
 }
 fetch(url)
   .then(res => res.json())
-  .then(() => {
-    networkDataReceived = true;
-    setTimeout(() => {
-      console.log("Creating card from network");
-      clearCards();
-      createCard("Network");
-    }, 1500);
+  .then(data => {
+    if (data) {
+      networkDataReceived = true;
+      setTimeout(() => {
+        console.log("Creating card from network");
+        clearCards();
+        createCard("Network");
+      }, 1500);
+    }
+  })
+  .catch(err => {
+    console.warn(`Error fetching ${url}: ${err}`);
   });

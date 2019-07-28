@@ -1,4 +1,4 @@
-const CACHE_STATIC_NAME = "static-v6";
+const CACHE_STATIC_NAME = "static-v5";
 const CACHE_DYNAMIC_NAME = "dynamic-v4";
 
 self.addEventListener("install", event => {
@@ -64,7 +64,7 @@ self.addEventListener("activate", event => {
   return self.clients.claim();
 });
 
-// Cache, fallback to network strategy
+// Cache, fallback to network + Generic fallback strategy
 // self.addEventListener("fetch", event => {
 //   // console.log("[Service Worker] Fetching something...", event.request.url);
 //   // Override what's is being respond. Null will make site unavailable
@@ -101,7 +101,7 @@ self.addEventListener("activate", event => {
 //   );
 // });
 
-// CACHE STRATEGIES
+// OTHER CACHE STRATEGIES
 
 //Cache Only
 // self.addEventListener("fetch", event => {
@@ -132,19 +132,52 @@ self.addEventListener("activate", event => {
 //   );
 // });
 
-// Cache, then network (see feed.js part)
-// Here we update the dynamic cache
-// Notes: We are re-caching what we have in static cache
-// We do not have offline support
+// Cache, then network (see feed.js part) + cache fallback network + Generic fallback
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.open(CACHE_DYNAMIC_NAME).then(cache =>
-      fetch(event.request).then(res => {
-        if (res.status === 200) {
-          cache.put(event.request, res.clone());
-        }
-        return res;
+  const url = "https://httpbin.org/get";
+  if (event.request.url.includes(url)) {
+    event.respondWith(
+      caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+        return fetch(event.request)
+          .then(res => {
+            if (res.status === 200) {
+              cache.put(event.request, res.clone());
+            }
+            return res;
+          })
+          .catch(err => {
+            console.warn(
+              `There was an errot fetching ${event.request.url}: ${err}`
+            );
+          });
       })
-    )
-  );
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        if (response) {
+          return response;
+        } else {
+          return fetch(event.request)
+            .then(res => {
+              return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+                if (res.status === 200) {
+                  cache.put(event.request.url, res.clone());
+                }
+                return res;
+              });
+            })
+            .catch(err => {
+              return caches.open(CACHE_STATIC_NAME).then(cache => {
+                // Filter the request that can return the offline page
+                // in this case a very very basic approach
+                if (event.request.url.includes("/help")) {
+                  return cache.match("/offline.html");
+                }
+              });
+            });
+        }
+      })
+    );
+  }
 });
