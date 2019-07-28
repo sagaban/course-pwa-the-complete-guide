@@ -42,6 +42,18 @@ self.addEventListener("install", event => {
   );
 });
 
+function trimCache(cacheName, maxItems) {
+  caches.open(cacheName).then(cache =>
+    cache.keys().then(keys => {
+      if (keys.length > maxItems) {
+        for (let i = 0; i < keys.length - maxItems; i++) {
+          cache.delete(keys[i]);
+        }
+      }
+    })
+  );
+}
+
 self.addEventListener("activate", event => {
   console.log("[Service Worker] Activating Service Worker...");
   // You can take control of uncontrolled clients by calling clients.claim()
@@ -140,6 +152,7 @@ self.addEventListener("fetch", event => {
       caches.open(CACHE_DYNAMIC_NAME).then(cache => {
         return fetch(event.request)
           .then(res => {
+            trimCache(CACHE_DYNAMIC_NAME, 20);
             if (res.status === 200) {
               cache.put(event.request, res.clone());
             }
@@ -161,6 +174,7 @@ self.addEventListener("fetch", event => {
           return fetch(event.request)
             .then(res => {
               return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+                trimCache(CACHE_DYNAMIC_NAME, 20);
                 if (res.status === 200) {
                   cache.put(event.request.url, res.clone());
                 }
@@ -170,8 +184,7 @@ self.addEventListener("fetch", event => {
             .catch(err => {
               return caches.open(CACHE_STATIC_NAME).then(cache => {
                 // Filter the request that can return the offline page
-                // in this case a very very basic approach
-                if (event.request.url.includes("/help")) {
+                if (event.request.headers.get("accept").includes("text/html")) {
                   return cache.match("/offline.html");
                 }
               });

@@ -30,12 +30,13 @@ window.addEventListener("beforeinstallprompt", event => {
   return false;
 });
 
+//In case we want/need to unregister a SW
 /*
-In case we want/need to unregister a SW
-
-navigator.serviceWorker.getRegistrations().then(function(registrations) {
-  for (let registration of registrations) {
-    registration.unregister();
-  }
-});
-*/
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for (let registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
+/** */
