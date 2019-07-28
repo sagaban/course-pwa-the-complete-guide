@@ -48,7 +48,13 @@ function onSaveButtonClicked(event) {
 }
 */
 
-function createCard() {
+function clearCards() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
+
+function createCard(from) {
   var cardWrapper = document.createElement("div");
   cardWrapper.className = "shared-moment-card mdl-card mdl-shadow--2dp";
   var cardTitle = document.createElement("div");
@@ -60,7 +66,7 @@ function createCard() {
   var cardTitleTextElement = document.createElement("h2");
   cardTitleTextElement.style.color = "white";
   cardTitleTextElement.className = "mdl-card__title-text";
-  cardTitleTextElement.textContent = "San Francisco Trip";
+  cardTitleTextElement.textContent = "San Francisco Trip " + from;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement("div");
   cardSupportingText.className = "mdl-card__supporting-text";
@@ -75,10 +81,43 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch("https://httpbin.org/get")
-  .then(function(res) {
-    return res.json();
-  })
-  .then(function(data) {
-    createCard();
+// fetch("https://httpbin.org/get")
+//   .then(function(res) {
+//     return res.json();
+//   })
+//   .then(function(data) {
+//     createCard();
+//   });
+
+// CACHE STRATEGIES
+// Cache, then network (see SW part)
+const url = "https://httpbin.org/get";
+let networkDataReceived = false;
+
+if ("caches" in window) {
+  caches
+    .match(url)
+    .then(cache => {
+      if (cache) {
+        return cache.json();
+      }
+    })
+    .then(() => {
+      console.log("Creating card from cache");
+      if (!networkDataReceived) {
+        clearCards();
+        createCard("Cache");
+        networkDataReceived = false;
+      }
+    });
+}
+fetch(url)
+  .then(res => res.json())
+  .then(() => {
+    networkDataReceived = true;
+    setTimeout(() => {
+      console.log("Creating card from network");
+      clearCards();
+      createCard("Network");
+    }, 1500);
   });
