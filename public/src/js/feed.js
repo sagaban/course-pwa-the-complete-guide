@@ -91,22 +91,13 @@ function updateUI(data) {
 // Cache, then network (see SW part)
 let networkDataReceived = false;
 
-if ("caches" in window) {
-  caches
-    .match(POSTS_URL)
-    .then(cache => {
-      if (cache) {
-        return cache.json();
-      }
-    })
-    .then(data => {
-      console.log("Creating card from cache");
-      if (data && !networkDataReceived) {
-        clearCards();
-        updateUI(Object.values(data));
-        networkDataReceived = false;
-      }
-    });
+if ("indexedDB" in window) {
+  readAllData("posts").then(data => {
+    if (!networkDataReceived) {
+      console.log("Creating card from indexedDB");
+      updateUI(data);
+    }
+  });
 }
 fetch(POSTS_URL)
   .then(res => res.json())
