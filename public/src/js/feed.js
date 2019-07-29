@@ -8,7 +8,7 @@ const POSTS_URL =
   "https://course-pwa-the-complete-guide.firebaseio.com/posts.json";
 
 function openCreatePostModal() {
-  createPostArea.style.display = "block";
+  createPostArea.style.transform = "translateY(0)";
   // Check if the PWA install event is stashed.
   if (deferredPrompt) {
     // Show the modal add to home screen dialog
@@ -28,7 +28,7 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = "none";
+  createPostArea.style.transform = "translateY(100vh)";
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);
@@ -63,7 +63,6 @@ function createCard(data) {
   cardTitle.className = "mdl-card__title";
   cardTitle.style.backgroundImage = `url("${data.image}")`;
   cardTitle.style.backgroundSize = "cover";
-  cardTitle.style.height = "180px";
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement("h2");
   cardTitleTextElement.style.color = "white";

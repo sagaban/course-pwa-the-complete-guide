@@ -39,6 +39,7 @@ self.addEventListener("install", event => {
         "/src/js/material.min.js",
         "/src/css/app.css",
         "/src/css/feed.css",
+        // We only cache the medium size image just to no blow or cache. Deal with it.
         "/src/images/main-image.jpg",
         // Maybe the icons, it depends
         "https://fonts.googleapis.com/css?family=Roboto:400,700",
