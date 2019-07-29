@@ -38,7 +38,7 @@ function clearAllData(st) {
   return dbPromise.then(db => {
     const tx = db.transaction(st, "readwrite");
     const store = tx.objectStore(st);
-    store.delete(id);
+    store.clear();
     return tx.done;
   });
 }
@@ -47,7 +47,7 @@ function deleteItemData(st, id) {
   return dbPromise.then(db => {
     const tx = db.transaction(st, "readwrite");
     const store = tx.objectStore(st);
-    store.clear();
+    store.delete(id);
     return tx.done;
   });
 }
