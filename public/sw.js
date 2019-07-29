@@ -158,7 +158,9 @@ self.addEventListener("fetch", event => {
       fetch(event.request).then(res => {
         const clonedRes = res.clone();
         clonedRes.json().then(data => {
-          writeData("posts", Object.values(data));
+          clearAllData("posts").then(() =>
+            writeData("posts", Object.values(data))
+          );
         });
         return res;
       })

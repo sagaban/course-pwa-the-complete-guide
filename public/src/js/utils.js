@@ -17,10 +17,11 @@ function writeData(st, data) {
     .then(db => {
       // console.log("Getting DB");
       const tx = db.transaction(st, "readwrite");
+      const store = tx.objectStore(st);
       const dataArray = Array.isArray(data) ? data : [data];
       dataArray.forEach(d => {
         // console.log("Adding data to DB");
-        tx.store.add(d);
+        store.add(d);
       });
       return tx.done;
     })
@@ -30,5 +31,23 @@ function writeData(st, data) {
 function readAllData(st) {
   return dbPromise.then(db => {
     return db.getAll(st);
+  });
+}
+
+function clearAllData(st) {
+  return dbPromise.then(db => {
+    const tx = db.transaction(st, "readwrite");
+    const store = tx.objectStore(st);
+    store.delete(id);
+    return tx.done;
+  });
+}
+
+function deleteItemData(st, id) {
+  return dbPromise.then(db => {
+    const tx = db.transaction(st, "readwrite");
+    const store = tx.objectStore(st);
+    store.clear();
+    return tx.done;
   });
 }
