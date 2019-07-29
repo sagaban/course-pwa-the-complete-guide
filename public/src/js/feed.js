@@ -9,22 +9,6 @@ const POSTS_URL =
 
 function openCreatePostModal() {
   createPostArea.style.transform = "translateY(0)";
-  // Check if the PWA install event is stashed.
-  if (deferredPrompt) {
-    // Show the modal add to home screen dialog
-    deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
-    deferredPrompt.userChoice.then(choice => {
-      if (choice.outcome === "accepted") {
-        // or !== 'dismissed'
-        console.log("User accepted the installation");
-      } else {
-        console.log("User dismissed the installation");
-      }
-      // Clear the saved prompt since it can't be used again
-      deferredPrompt = null;
-    });
-  }
 }
 
 function closeCreatePostModal() {

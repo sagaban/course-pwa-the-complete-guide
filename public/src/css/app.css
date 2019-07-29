@@ -5,3 +5,8 @@
 .drawer-option {
   padding: 16px;
 }
+
+#installButton {
+  cursor: pointer;
+  display: none;
+}
