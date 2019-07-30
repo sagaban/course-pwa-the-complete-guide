@@ -1,9 +1,13 @@
-var shareImageButton = document.querySelector("#share-image-button");
-var createPostArea = document.querySelector("#create-post");
-var closeCreatePostModalButton = document.querySelector(
+const shareImageButton = document.querySelector("#share-image-button");
+const createPostArea = document.querySelector("#create-post");
+const closeCreatePostModalButton = document.querySelector(
   "#close-create-post-modal-btn"
 );
-var sharedMomentsArea = document.querySelector("#shared-moments");
+const sharedMomentsArea = document.querySelector("#shared-moments");
+const form = document.querySelector("form");
+const titleInput = document.querySelector("#title");
+const locationInput = document.querySelector("#location");
+
 const POSTS_URL =
   "https://course-pwa-the-complete-guide.firebaseio.com/posts.json";
 
@@ -97,3 +101,58 @@ fetch(POSTS_URL)
   .catch(err => {
     console.warn(`Error fetching ${POSTS_URL}: ${err}`);
   });
+
+function sendNewPost() {
+  fetch(POSTS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image:
+        "https://firebasestorage.googleapis.com/v0/b/course-pwa-the-complete-guide.appspot.com/o/sf-boat.jpg?alt=media&token=b18c5fa9-3037-4117-911f-228a935c3558"
+    })
+  }).then(res => {
+    console.log("Sent data: ", res);
+    updateUI();
+  });
+}
+
+form.addEventListener("submit", event => {
+  event.preventDefault();
+  if (titleInput.value.trim() === "" && locationInput.value.trim() === "") {
+    alert("Please, insert valid data");
+    return;
+  }
+  closeCreatePostModal();
+
+  if ("serviceWorker" in navigator && "SyncManager" in window) {
+    navigator.serviceWorker.ready.then(sw => {
+      const post = {
+        id: new Date().toISOString(),
+        title: titleInput.value,
+        location: locationInput.value
+      };
+      writeData("sync-posts", post)
+        .then(() => {
+          return sw.sync.register("sync-new-posts");
+        })
+        .then(() => {
+          const snackbarContainer = document.querySelector(
+            "#confirmation-toast"
+          );
+          const data = { message: "Your Post has been saved for syncing!" };
+          snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        })
+        .catch(e => {
+          console.log("Error sync-ing the new Post");
+        });
+    });
+  } else {
+    sendNewPost();
+  }
+});

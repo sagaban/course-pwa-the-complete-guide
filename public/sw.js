@@ -193,3 +193,40 @@ self.addEventListener("fetch", event => {
     );
   }
 });
+
+self.addEventListener("sync", event => {
+  console.log("[Service worker] Background syncing");
+  // We could use a `switch` if there are more tags
+  if (event.tag === "sync-new-posts") {
+    console.log("[Service worker] Syncing new Posts");
+    event.waitUntil(
+      readAllData("sync-posts").then(data => {
+        for (let dt of data) {
+          fetch(POSTS_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json"
+            },
+
+            body: JSON.stringify({
+              ...dt,
+              image:
+                "https://firebasestorage.googleapis.com/v0/b/course-pwa-the-complete-guide.appspot.com/o/sf-boat.jpg?alt=media&token=b18c5fa9-3037-4117-911f-228a935c3558"
+            })
+          })
+            .then(res => {
+              console.log("[Service worker] Sent data: ", res);
+              if (res.ok) {
+                // NOT WORKING PROPERLY
+                deleteItemData("sync-posts", dt.id);
+              }
+            })
+            .catch(err => {
+              console.log("[Service worker] Error while sending data: ", err);
+            });
+        }
+      })
+    );
+  }
+});

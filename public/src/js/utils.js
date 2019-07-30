@@ -1,7 +1,7 @@
 const dbPromise = idb.openDB("post-store", 1, {
   upgrade(db) {
     // Create a store of objects
-    const store = db.createObjectStore("posts", {
+    db.createObjectStore("posts", {
       // The 'id' property of the object will be the key.
       keyPath: "id",
       // If it isn't explicitly set, create a value by auto incrementing.
@@ -9,6 +9,8 @@ const dbPromise = idb.openDB("post-store", 1, {
     });
     // Create an index on the 'date' property of the objects.
     // store.createIndex('date', 'date');
+
+    db.createObjectStore("sync-posts", { keyPath: "id" });
   }
 });
 
