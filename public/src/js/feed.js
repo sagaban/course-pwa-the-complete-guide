@@ -8,8 +8,11 @@ const form = document.querySelector("form");
 const titleInput = document.querySelector("#title");
 const locationInput = document.querySelector("#location");
 
-const POSTS_URL =
+const POSTS_GET_URL =
   "https://course-pwa-the-complete-guide.firebaseio.com/posts.json";
+
+const POSTS_POST_URL =
+  "https://us-central1-course-pwa-the-complete-guide.cloudfunctions.net/storePostData";
 
 function openCreatePostModal() {
   createPostArea.style.transform = "translateY(0)";
@@ -86,7 +89,7 @@ if ("indexedDB" in window) {
     }
   });
 }
-fetch(POSTS_URL)
+fetch(POSTS_GET_URL)
   .then(res => res.json())
   .then(data => {
     if (data) {
@@ -103,7 +106,7 @@ fetch(POSTS_URL)
   });
 
 function sendNewPost() {
-  fetch(POSTS_URL, {
+  fetch(POSTS_POST_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -118,6 +121,7 @@ function sendNewPost() {
     })
   }).then(res => {
     console.log("Sent data: ", res);
+    // This won't work
     updateUI();
   });
 }
@@ -147,6 +151,14 @@ form.addEventListener("submit", event => {
           );
           const data = { message: "Your Post has been saved for syncing!" };
           snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          // I will add it, with a fade image. don't as a feedback to the user
+          updateUI([
+            {
+              ...post,
+              image:
+                "https://firebasestorage.googleapis.com/v0/b/course-pwa-the-complete-guide.appspot.com/o/sf-boat.jpg?alt=media&token=b18c5fa9-3037-4117-911f-228a935c3558"
+            }
+          ]);
         })
         .catch(e => {
           console.log("Error sync-ing the new Post");

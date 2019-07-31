@@ -3,8 +3,10 @@ importScripts("/src/js/utils.js");
 
 const CACHE_STATIC_NAME = "static-v5";
 const CACHE_DYNAMIC_NAME = "dynamic-v4";
-const POSTS_URL =
+const POSTS_GET_URL =
   "https://course-pwa-the-complete-guide.firebaseio.com/posts.json";
+const POSTS_POST_URL =
+  "https://us-central1-course-pwa-the-complete-guide.cloudfunctions.net/storePostData";
 
 self.addEventListener("install", event => {
   console.log("[Service Worker] Installing Service Worker...");
@@ -154,7 +156,7 @@ self.addEventListener("activate", event => {
 
 // Cache, then network (see feed.js part) + cache fallback network + Generic fallback
 self.addEventListener("fetch", event => {
-  if (event.request.url.includes(POSTS_URL)) {
+  if (event.request.url.includes(POSTS_GET_URL)) {
     event.respondWith(
       fetch(event.request).then(res => {
         const clonedRes = res.clone();
@@ -202,7 +204,7 @@ self.addEventListener("sync", event => {
     event.waitUntil(
       readAllData("sync-posts").then(data => {
         for (let dt of data) {
-          fetch(POSTS_URL, {
+          fetch(POSTS_POST_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -218,8 +220,9 @@ self.addEventListener("sync", event => {
             .then(res => {
               console.log("[Service worker] Sent data: ", res);
               if (res.ok) {
-                // NOT WORKING PROPERLY
-                deleteItemData("sync-posts", dt.id);
+                res.json().then(resData => {
+                  deleteItemData("sync-posts", resData.id);
+                });
               }
             })
             .catch(err => {
